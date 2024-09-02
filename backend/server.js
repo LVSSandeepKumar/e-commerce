@@ -5,6 +5,8 @@ import {v2 as cloudinary} from "cloudinary";
 
 import authRoutes from "./routes/auth.route.js";
 import postRoutes from "./routes/post.route.js";
+
+import { protectRoute } from "./middleware/protectRoute.js";
 import connectToDB from "./utils/connectDB.js";
 
 dotenv.config();
@@ -22,7 +24,7 @@ app.use(express.json()); //allows users to parse payloads with json requests
 app.use(cookieParser()); //allows users to parse headers with cookies
 
 app.use("/api/auth", authRoutes); // Routes for authentication
-app.use("/api/post", postRoutes); // Routes for posts
+app.use("/api/post",protectRoute, postRoutes); // Routes for posts
 
 app.listen(PORT, () => {
     console.log(`Server running at ${PORT}`);

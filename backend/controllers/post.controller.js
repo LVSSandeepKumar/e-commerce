@@ -49,3 +49,18 @@ export const createPost = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getAllPosts = async (req,res) => {
+    try {
+        //Fetch all posts from DB and send them to client
+        const posts = await Post.find().sort({createdAt: -1});
+        if(!posts) {
+            return res.status(200).json([]);
+        }
+        return res.status(200).json(posts);
+    } catch (error) {
+        //Error Handling
+        console.log(`Error in getAllPosts controller`, error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}

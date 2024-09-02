@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { createPost } from "../controllers/post.controller.js";
-import { protectRoute } from "../middleware/protectRoute.js";
+import { createPost, getAllPosts } from "../controllers/post.controller.js";
 
 const router = Router();
 
-router.post("/create",protectRoute, createPost);
+router.post("/create", createPost);
+router.get("/", getAllPosts);
 
 export default router;
