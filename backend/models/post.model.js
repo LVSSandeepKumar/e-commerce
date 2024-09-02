@@ -16,10 +16,11 @@ const postSchema = new mongoose.Schema({
   },
   hashtags: [
     {
-        type:String
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Hashtag"
     }
   ],
-})
+}, {timestamps: true})
 
 const Post = mongoose.model("Post", postSchema);
 
