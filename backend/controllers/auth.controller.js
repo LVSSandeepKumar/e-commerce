@@ -87,3 +87,14 @@ export const logout = async (req,res) => {
         return res.status(500).json({ message: "Internal Server Error"});
     }
 }
+
+export const getMe = async(req,res) => {
+    try {
+        const user = req.user;
+        return res.status(200).json({user});
+    } catch (error) {
+        //Error Handling
+        console.log("Error in getMe controller", error);
+        return res.status(500).json({ message: "Internal Server Error"});
+    }
+}
