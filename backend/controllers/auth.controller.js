@@ -48,7 +48,27 @@ export const signup = async (req,res) => {
 
 export const login = async (req,res) => {
     try {
-        
+        //Check if user entered both email and password
+        const {email, password} = req.body;
+        if(!email || !password) {
+            return res.status(400).json({ message: "Please enter both email & password" });
+        }
+        //Check if user exist in our db
+        const user = await User.findOne({email});
+        if(!user) {
+            return res.status(400).json({ message: "No user found with this email" });
+        }
+        //Compare the user password with password entered
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if(!isPasswordCorrect) {
+            return res.status(401).json({ message: "Incorrect Password" });
+        }
+        //Generate Token and Set Cookie
+        generateTokenAndSetCookie(user._id, res);
+        return res.status(201).json({ user: {
+            ...user._doc,
+            password: null
+        }})
     } catch (error) {
         //Error Handling
         console.log("Error in login controller", error);
