@@ -19,6 +19,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["Customer", "Admin"]
     },
+    savedPosts: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Post"
+        }
+    ],
 }, {timestamps: true})
 
 const User = mongoose.model("User", userSchema);

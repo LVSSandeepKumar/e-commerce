@@ -95,7 +95,7 @@ export const upVotePost = async (req, res) => {
     const { id: postId } = req.params;
     //Find the post with that Id
     const post = await Post.findById(postId);
-    if(!post) {
+    if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
     //Check if the user has already upVoted the post
@@ -117,24 +117,24 @@ export const upVotePost = async (req, res) => {
   }
 };
 
-export const downVotePost = async(req,res) => {
+export const downVotePost = async (req, res) => {
   try {
     //Fetch the postId and userId from req
     const userId = req.user._id;
-    const {id: postId} = req.params;
+    const { id: postId } = req.params;
     //Find the post with the given ID
     const post = await Post.findById(postId);
-    if(!post) {
+    if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
     //Check if the user has already down voted the post
     const hasUserDownVotedPost = post.downVotes.includes(userId);
-    if(hasUserDownVotedPost) {
+    if (hasUserDownVotedPost) {
       //Undo Down Vote
-      await post.updateOne({$pull: {downVotes : userId}})
+      await post.updateOne({ $pull: { downVotes: userId } });
     } else {
       //Down Vote
-      await post.updateOne({$push: {downVotes : userId}})
+      await post.updateOne({ $push: { downVotes: userId } });
     }
     //Save the changes in post and send to client
     await post.save();
@@ -144,4 +144,48 @@ export const downVotePost = async(req,res) => {
     console.log("Error in downVotePost controller", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
-}
+};
+
+export const savePost = async (req, res) => {
+  try {
+    //Fetch userId and postId from req
+    const userId = req.user._id;
+    const { id: postId } = req.params;
+    //Find the post with the given ID
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    //Find the user and check user's saved posts
+    const user = await User.findById(userId).select("-password");
+    const isPostSaved = user.savedPosts.includes(postId);
+    if(isPostSaved) {
+      //Unsave Post
+      await user.updateOne({$pull: {savedPosts : postId}});
+    } else {
+      //Save Post
+      await user.updateOne({$push: {savedPosts: postId}});
+    }
+    //Save the user and return to client
+    await user.save();
+    return res.status(200).json(user);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in savePost controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getSavedPosts = async (req, res) => {
+  try {
+    //Get userId from req
+    const userId = req.user._id;
+    //Fetch the saved posts of that user from db and return back to client
+    const savedPosts = await User.findById(userId).populate("savedPosts").select("-password");
+    return res.status(200).json(savedPosts);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in getSavedPosts controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
