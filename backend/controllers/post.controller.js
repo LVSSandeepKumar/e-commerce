@@ -95,6 +95,9 @@ export const upVotePost = async (req, res) => {
     const { id: postId } = req.params;
     //Find the post with that Id
     const post = await Post.findById(postId);
+    if(!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
     //Check if the user has already upVoted the post
     const hasUserUpVotedPost = post.upVotes.includes(userId);
     if (hasUserUpVotedPost) {
@@ -113,3 +116,32 @@ export const upVotePost = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const downVotePost = async(req,res) => {
+  try {
+    //Fetch the postId and userId from req
+    const userId = req.user._id;
+    const {id: postId} = req.params;
+    //Find the post with the given ID
+    const post = await Post.findById(postId);
+    if(!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    //Check if the user has already down voted the post
+    const hasUserDownVotedPost = post.downVotes.includes(userId);
+    if(hasUserDownVotedPost) {
+      //Undo Down Vote
+      await post.updateOne({$pull: {downVotes : userId}})
+    } else {
+      //Down Vote
+      await post.updateOne({$push: {downVotes : userId}})
+    }
+    //Save the changes in post and send to client
+    await post.save();
+    return res.status(200).json(post);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in downVotePost controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
