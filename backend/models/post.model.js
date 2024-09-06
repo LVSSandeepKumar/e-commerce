@@ -20,6 +20,18 @@ const postSchema = new mongoose.Schema({
         ref: "Hashtag"
     }
   ],
+  upVotes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
+  ],
+  downVotes:[
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
+  ],
 }, {timestamps: true})
 
 const Post = mongoose.model("Post", postSchema);

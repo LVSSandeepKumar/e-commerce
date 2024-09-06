@@ -87,3 +87,29 @@ export const getPostsByHashtag = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const upVotePost = async (req, res) => {
+  try {
+    //Fetch postId and userId from request
+    const userId = req.user._id;
+    const { id: postId } = req.params;
+    //Find the post with that Id
+    const post = await Post.findById(postId);
+    //Check if the user has already upVoted the post
+    const hasUserUpVotedPost = post.upVotes.includes(userId);
+    if (hasUserUpVotedPost) {
+      //Undo the upVote
+      await post.updateOne({ $pull: { upVotes: userId } });
+    } else {
+      //upVote
+      await post.updateOne({ $push: { upVotes: userId } });
+    }
+    //Save the post and return the client to user
+    await post.save();
+    return res.status(200).json(post);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in upVotePost controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
