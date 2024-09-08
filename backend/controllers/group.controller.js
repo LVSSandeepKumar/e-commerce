@@ -41,3 +41,44 @@ export const createGroup = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getAllGroups = async (req, res) => {
+  try {
+    //Get All Groups and return them to client
+    const groups = await Group.find();
+    return res.status(200).json(groups);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in getAllGroups controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getGroupsByPopularity = async (req, res) => {
+  try {
+    //Fetch groups based on the number of participants
+    const groups = await Group.aggregate([
+      {
+        $project: {
+          name: 1,
+          hashtags: 1,
+          owner: 1,
+          admins: 1,
+          participants: 1,
+          participantsCount: { $size: "$participants" },
+        },
+      },
+      {
+        $sort: {
+          participantsCount: -1,
+        },
+      },
+    ]);
+    //Return the groups to client
+    return res.status(200).json(groups);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in getGroupsByPopularity controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};

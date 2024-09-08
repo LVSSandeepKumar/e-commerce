@@ -1,8 +1,14 @@
 import { Router } from "express";
-import { createGroup } from "../controllers/group.controller.js";
+import {
+  createGroup,
+  getAllGroups,
+  getGroupsByPopularity,
+} from "../controllers/group.controller.js";
 
 const router = Router();
 
-router.post("/create",createGroup);
+router.get("/", getAllGroups);
+router.get("/popular", getGroupsByPopularity);
+router.post("/create", createGroup);
 
 export default router;
