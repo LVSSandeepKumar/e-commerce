@@ -5,6 +5,7 @@ import {v2 as cloudinary} from "cloudinary";
 
 import authRoutes from "./routes/auth.route.js";
 import postRoutes from "./routes/post.route.js";
+import groupRoutes from "./routes/group.route.js";
 
 import { protectRoute } from "./middleware/protectRoute.js";
 import connectToDB from "./utils/connectDB.js";
@@ -25,6 +26,7 @@ app.use(cookieParser()); //allows users to parse headers with cookies
 
 app.use("/api/auth", authRoutes); // Routes for authentication
 app.use("/api/post",protectRoute, postRoutes); // Routes for posts
+app.use("/api/group", protectRoute, groupRoutes); // Routes for Groups
 
 app.listen(PORT, () => {
     console.log(`Server running at ${PORT}`);

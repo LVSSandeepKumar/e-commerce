@@ -12,6 +12,12 @@ const hashtagSchema = new mongoose.Schema({
             ref: "Post"
         }
     ],
+    groups: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Group"
+        }
+    ],
     followers: [
         {
             type: mongoose.Schema.Types.ObjectId,

@@ -1,5 +1,5 @@
 export default function extractHashtags(content) {
-    const contentStr = JSON.stringify(content);
+    const contentStr = JSON.stringify(content).toLowerCase();
     // Use a regular expression to find words that start with a '#'
     const hashtagPattern = /#\w+/g;
     // Match the pattern against the content and return the matches

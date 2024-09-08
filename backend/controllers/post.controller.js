@@ -32,10 +32,12 @@ export const createPost = async (req, res) => {
     });
     //Implement Hashtags
     for (let tag of hashtags) {
+      //Find hashtag or else create one with the name
       let hashtag = await Hashtag.findOne({ name: tag });
       if (!hashtag) {
         hashtag = new Hashtag({ name: tag });
       }
+      //Update the post and hashtag details and save them
       hashtag.posts.push(post._id);
       post.hashtags.push(hashtag._id);
       await hashtag.save();
