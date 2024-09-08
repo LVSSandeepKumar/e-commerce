@@ -82,3 +82,24 @@ export const getGroupsByPopularity = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getGroupsByHashtag = async (req, res) => {
+  try {
+    const { hashtag } = req.params;
+    const foundHashtag = await Hashtag.findOne({ name: hashtag.toLowerCase() });
+    if (!foundHashtag) {
+      return res.status(404).json({ message: "No hashtag found" });
+    }
+    const groups = await Group.find({ hashtags: foundHashtag._id })
+      .populate("owner", "username")
+      .populate("admins", "username")
+      .populate("participants", "username")
+      .populate("hashtags", "name");
+
+    return res.status(200).json(groups);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in getGroupsByHashtags", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
