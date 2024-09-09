@@ -6,7 +6,7 @@ export const createGroup = async (req, res) => {
     //Fetch userId from req
     const userId = req.user._id;
     //Fetch name and hashtags from req body
-    const { name, hashtags } = req.body;
+    const { name, hashtags, isPublic } = req.body;
     if (!name) {
       return res.status(400).json({ message: "Name is required" });
     }
@@ -14,6 +14,7 @@ export const createGroup = async (req, res) => {
     const group = new Group({
       name,
       owner: userId,
+      isPublic,
       admins: [userId],
       participants: [userId],
     });
@@ -100,6 +101,43 @@ export const getGroupsByHashtag = async (req, res) => {
   } catch (error) {
     //Error Handling
     console.log("Error in getGroupsByHashtags", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const joinGroup = async (req, res) => {
+  try {
+    //Fetch userId and groupId from request
+    const userId = req.user._id;
+    const { id: groupId } = req.params;
+    //Check if there is a group with the given Id
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+    //Check if the user is already a part of group or not
+    const isAlreadyJoined =
+      group.participants.includes(userId) || group.requests.includes(userId);
+    //Check if the group is public or not
+    const isPublicGroup = group.isPublic;
+    //If the user has not joined
+    if (!isAlreadyJoined) {
+      if (isPublicGroup) {
+        //Add userId to participants
+        group.participants.push(userId);
+      } else {
+        //Add userId to requests
+        group.requests.push(userId);
+      }
+    } else {
+      return res.status(400).json({ message: "You are already a part of group" });
+    }
+    //Save the group changes and send the response to client
+    await group.save();
+    return res.status(200).json({ message: `${isPublicGroup ? "Group joined successfully" : "Group join request sent"}`,group });
+  } catch (error) {
+    //Error Handling
+    console.log("Error in joinGroup controller", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
