@@ -105,6 +105,24 @@ export const getGroupsByHashtag = async (req, res) => {
   }
 };
 
+export const getGroupDetails = async (req, res) => {
+  try {
+    //Get groupId from req
+    const { groupId } = req.params;
+    //Find for group with the id
+    const group = await Group.findById(groupId)
+      .populate("participants", "username")
+      .populate("requests", "username")
+      .populate("admins", "username");
+    //Send the group in response to client
+    return res.status(200).json(group);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in getGroupDetails controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 export const joinGroup = async (req, res) => {
   try {
     //Fetch userId and groupId from request
