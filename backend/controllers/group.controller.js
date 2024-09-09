@@ -109,9 +109,12 @@ export const joinGroup = async (req, res) => {
   try {
     //Fetch userId and groupId from request
     const userId = req.user._id;
-    const { id: groupId } = req.params;
+    const { groupId } = req.params;
     //Check if there is a group with the given Id
-    const group = await Group.findById(groupId);
+    const group = await Group.findById(groupId)
+      .populate("participants", "username")
+      .populate("requests", "username")
+      .populate("admins", "username");
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
@@ -130,14 +133,43 @@ export const joinGroup = async (req, res) => {
         group.requests.push(userId);
       }
     } else {
-      return res.status(400).json({ message: "You are already a part of group" });
+      return res
+        .status(400)
+        .json({ message: "You are already a part of group" });
     }
     //Save the group changes and send the response to client
     await group.save();
-    return res.status(200).json({ message: `${isPublicGroup ? "Group joined successfully" : "Group join request sent"}`,group });
+    return res.status(200).json({
+      message: `${
+        isPublicGroup ? "Group joined successfully" : "Group join request sent"
+      }`,
+      group,
+    });
   } catch (error) {
     //Error Handling
     console.log("Error in joinGroup controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const acceptRequest = async (req, res) => {
+  try {
+    //Fetch the userId to be accepted and groupId from req params
+    const { id: userId, groupId } = req.params;
+    //Find the group with the id
+    const group = await Group.findById(groupId)
+      .populate("participants", "username")
+      .populate("requests", "username")
+      .populate("admins", "username");
+    //Pop the userId from requests and push to participants
+    group.requests.pop(userId);
+    group.participants.push(userId);
+    //Save the group and respond to client
+    await group.save();
+    return res.status(200).json(group);
+  } catch (error) {
+    //Error handling
+    console.log("Error in acceptRequest controller", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  acceptRequest,
   createGroup,
   getAllGroups,
   getGroupsByHashtag,
@@ -13,6 +14,7 @@ router.get("/", getAllGroups);
 router.get("/popular", getGroupsByPopularity);
 router.get("/hashtag/:hashtag", getGroupsByHashtag);
 router.post("/create", createGroup);
-router.post("/join/:id", joinGroup);
+router.post("/join/:groupId", joinGroup);
+router.post("/:groupId/acceptRequest/:id", acceptRequest);
 
 export default router;
