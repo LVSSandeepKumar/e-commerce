@@ -7,7 +7,9 @@ import {
   getGroupsByHashtag,
   getGroupsByPopularity,
   joinGroup,
+  removePerson,
 } from "../controllers/group.controller.js";
+import {adminRoute} from "../middleware/adminRoute.js";
 
 const router = Router();
 
@@ -17,6 +19,7 @@ router.get("/hashtag/:hashtag", getGroupsByHashtag);
 router.get("/:groupId", getGroupDetails);
 router.post("/create", createGroup);
 router.post("/join/:groupId", joinGroup);
-router.post("/:groupId/acceptRequest/:id", acceptRequest);
+router.post("/:groupId/acceptRequest/:id",adminRoute, acceptRequest);
+router.post("/:groupId/remove/:id", adminRoute, removePerson);
 
 export default router;

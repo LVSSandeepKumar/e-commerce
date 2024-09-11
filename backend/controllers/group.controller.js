@@ -191,3 +191,21 @@ export const acceptRequest = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const removePerson = async (req, res) => {
+  try {
+    //Fetch userId and groupId from req params
+    const { groupId, id: userId } = req.params;
+    //Find the group with the ID
+    const group = await Group.findByIdAndUpdate(groupId, {$pull : {participants : userId}})
+      .populate("admins", "username")
+      .populate("participants", "username");
+    //Save the changes and return the group in response to client
+    await group.save();
+    return res.status(200).json(group);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in removePerson controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
