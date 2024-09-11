@@ -192,6 +192,23 @@ export const acceptRequest = async (req, res) => {
   }
 };
 
+export const deleteRequest = async(req,res) => {
+  try {
+    const {groupId, id:userId} = req.params;
+
+    const group = await Group.findByIdAndUpdate(groupId, {$pull: {requests: userId}})
+    .populate("requests", "username")
+    .populate("participants", "username")
+
+    await group.save();
+    return res.status(200).json(group);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in deleteRequest controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 export const removePerson = async (req, res) => {
   try {
     //Fetch userId and groupId from req params
