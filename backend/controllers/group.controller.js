@@ -1,5 +1,8 @@
+import { v2 as cloudinary } from "cloudinary";
+
 import Group from "../models/group.model.js";
 import Hashtag from "../models/hashtag.model.js";
+import Message from "../models/message.model.js";
 
 export const createGroup = async (req, res) => {
   try {
@@ -86,17 +89,19 @@ export const getGroupsByPopularity = async (req, res) => {
 
 export const getGroupsByHashtag = async (req, res) => {
   try {
+    //Fetch hashtag from req params
     const { hashtag } = req.params;
+    //Find the Hashtag with the name or else create one
     const foundHashtag = await Hashtag.findOne({ name: hashtag.toLowerCase() });
     if (!foundHashtag) {
       return res.status(404).json({ message: "No hashtag found" });
     }
+    //Find the groups with that Hashtag and return the response to client
     const groups = await Group.find({ hashtags: foundHashtag._id })
       .populate("owner", "username")
       .populate("admins", "username")
       .populate("participants", "username")
       .populate("hashtags", "name");
-
     return res.status(200).json(groups);
   } catch (error) {
     //Error Handling
@@ -194,12 +199,13 @@ export const acceptRequest = async (req, res) => {
 
 export const deleteRequest = async(req,res) => {
   try {
+    //Get GroupId, userId from req
     const {groupId, id:userId} = req.params;
-
+    //Find the group with the ID and remove the userId from requests array
     const group = await Group.findByIdAndUpdate(groupId, {$pull: {requests: userId}})
     .populate("requests", "username")
     .populate("participants", "username")
-
+    //Save changes and return the response to client
     await group.save();
     return res.status(200).json(group);
   } catch (error) {
@@ -226,3 +232,47 @@ export const removePerson = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const sendMessage = async(req,res) => {
+  try {
+    //Read senderId and groupId from req & req params
+    const senderId = req.user._id;
+    const {groupId} = req.params;
+    //Fetch message and image from req body
+    const {message} = req.body;
+    let {img} = req.body;
+    //Check if there is message and alert the client
+    if(!message) {
+      return res.status(400).json({ message: "Message can't be empty" });
+    }
+    //Upload the image to cloudinary and get secured url
+    if(img) {
+      const response = await cloudinary.uploader.upload(img);
+      img = response.secure_url;
+    }
+    //Create new message and save it
+    const newMessage = new Message({
+      senderId,
+      message,
+      img
+    })
+    await newMessage.save();
+    //Find the group with the group Id
+    const group = await Group.findById(groupId).populate("messages", "senderId").populate("messages", "message");
+    //Check if the user is a member of group 
+    const isParticipant = group.participants.includes(senderId);
+    //If not, then send error message
+    if(!isParticipant) {
+      return res.status(403).json({ message: "Only group members can send messages" });
+    }
+    //Push the new message id into group messages
+    group.messages.push(newMessage._id);
+    //Save the changes and return the response to client
+    await group.save();
+    return res.status(200).json(group);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in sendMessage controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}

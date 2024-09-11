@@ -9,6 +9,7 @@ import {
   getGroupsByPopularity,
   joinGroup,
   removePerson,
+  sendMessage,
 } from "../controllers/group.controller.js";
 import {adminRoute} from "../middleware/adminRoute.js";
 
@@ -23,5 +24,6 @@ router.post("/join/:groupId", joinGroup);
 router.post("/:groupId/acceptRequest/:id",adminRoute, acceptRequest);
 router.post("/:groupId/deleteRequest/:id",adminRoute, deleteRequest);
 router.post("/:groupId/remove/:id", adminRoute, removePerson);
+router.post("/:groupId/message/send", sendMessage);
 
 export default router;
