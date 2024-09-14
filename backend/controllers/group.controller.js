@@ -233,6 +233,24 @@ export const removePerson = async (req, res) => {
   }
 };
 
+export const changeGroupPrivacy = async(req,res) => {
+  try {
+    //Fetch the groupId from req params
+    const {groupId} = req.params;
+    //Find the group with that Id
+    const group = await Group.findById(groupId);
+    //Toggle the group privacy setting
+    group.isPublic = !group.isPublic;
+    //Save the changes in group and send the group as response back to client
+    await group.save();
+    return res.status(200).json(group);
+  } catch (error) {
+    //Error Handling
+    console.log("Error in changeGroupPrivacy controller", error);
+    return res.status(200).json({ message: "Internal Server Error" });
+  }
+}
+
 export const sendMessage = async(req,res) => {
   try {
     //Read senderId and groupId from req & req params
@@ -258,7 +276,7 @@ export const sendMessage = async(req,res) => {
     })
     await newMessage.save();
     //Find the group with the group Id
-    const group = await Group.findById(groupId).populate("messages", "senderId").populate("messages", "message");
+    const group = await Group.findById(groupId).populate("messages", "senderId").populate("messages", "message").sort({createdAt: -1});
     //Check if the user is a member of group 
     const isParticipant = group.participants.includes(senderId);
     //If not, then send error message

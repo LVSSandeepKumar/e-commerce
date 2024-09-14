@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   acceptRequest,
+  changeGroupPrivacy,
   createGroup,
   deleteRequest,
   getAllGroups,
@@ -24,6 +25,7 @@ router.post("/join/:groupId", joinGroup);
 router.post("/:groupId/acceptRequest/:id",adminRoute, acceptRequest);
 router.post("/:groupId/deleteRequest/:id",adminRoute, deleteRequest);
 router.post("/:groupId/remove/:id", adminRoute, removePerson);
+router.post("/:groupId/changePrivacy", adminRoute, changeGroupPrivacy);
 router.post("/:groupId/message/send", sendMessage);
 
 export default router;
