@@ -11,6 +11,7 @@ import {
   joinGroup,
   removePerson,
   sendMessage,
+  updateGroupDetails,
 } from "../controllers/group.controller.js";
 import {adminRoute} from "../middleware/adminRoute.js";
 
@@ -26,6 +27,7 @@ router.post("/:groupId/acceptRequest/:id",adminRoute, acceptRequest);
 router.post("/:groupId/deleteRequest/:id",adminRoute, deleteRequest);
 router.post("/:groupId/remove/:id", adminRoute, removePerson);
 router.post("/:groupId/changePrivacy", adminRoute, changeGroupPrivacy);
+router.post("/:groupId/update", updateGroupDetails);
 router.post("/:groupId/message/send", sendMessage);
 
 export default router;

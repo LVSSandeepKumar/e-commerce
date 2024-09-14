@@ -5,6 +5,9 @@ const groupSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    groupImage: {
+        type: String
+    },
     hashtags: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Hashtag"

@@ -10,8 +10,14 @@ export const createGroup = async (req, res) => {
     const userId = req.user._id;
     //Fetch name and hashtags from req body
     const { name, hashtags, isPublic } = req.body;
+    let {groupImage} = req.body;
     if (!name) {
       return res.status(400).json({ message: "Name is required" });
+    }
+    //Upload the group image to cloudinary and get secure url
+    if(groupImage) {
+      const response = await cloudinary.uploader.upload(groupImage);
+      groupImage = response.secure_url;
     }
     //Create a group
     const group = new Group({
@@ -20,6 +26,7 @@ export const createGroup = async (req, res) => {
       isPublic,
       admins: [userId],
       participants: [userId],
+      groupImage
     });
     //Implement Hashtags
     if (hashtags && Array.isArray(hashtags)) {
@@ -248,6 +255,56 @@ export const changeGroupPrivacy = async(req,res) => {
     //Error Handling
     console.log("Error in changeGroupPrivacy controller", error);
     return res.status(200).json({ message: "Internal Server Error" });
+  }
+}
+
+export const updateGroupDetails = async(req,res) => {
+  try {
+    //Fetch groupId from req params
+    const {groupId} = req.params;
+    //Fetch name, img and hashtags from req.body
+    const {name, hashtags} = req.body;
+    let {groupImage} = req.body;
+    //Check if the name is entered or not
+    if(!name) {
+      return res.status(400).json({ message: "Name can't be empty" });
+    }
+    //Find the group with the given ID
+    const group = await Group.findById(groupId);
+    //Destroy the previous image and upload the new image to cloudinary
+    if(groupImage) {
+      if(group.groupImage) {
+        await cloudinary.uploader.destroy(group.groupImage.split("/").pop().split(".")[0])
+      }
+      const response = await cloudinary.uploader.upload(groupImage);
+      groupImage = response.secure_url;
+    }
+    //Implement Hashtags
+    if (hashtags && Array.isArray(hashtags)) {
+      group.hashtags = [];
+      for (let tag of hashtags) {
+        tag = tag.toLowerCase();
+        //Find the hashtag or create one with the given name
+        let hashtag = await Hashtag.findOne({ name: tag });
+        if (!hashtag) {
+          hashtag = new Hashtag({ name: tag });
+        }
+        //Update hashtags and groups and save the hashtag
+        hashtag.groups.push(group._id);
+        group.hashtags.push(hashtag._id);
+        await hashtag.save();
+      }
+    }
+    //Change group details to new data
+    group.name = name;
+    group.groupImage = groupImage || group.groupImage;
+    //Save the changes and send the response to client
+    await group.save();
+    return res.status(200).json({group, message: "Group details updated successfully"});
+  } catch (error) {
+    //Error Handling
+    console.log("Error in updateGroupDetails controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
