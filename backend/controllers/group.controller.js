@@ -53,6 +53,37 @@ export const createGroup = async (req, res) => {
   }
 };
 
+export const deleteGroup = async (req,res) => {
+  try {
+    //Get userId and groupId from req
+    const userId = req.user._id;
+    const {groupId} = req.params;
+    //Find the group with the given Id
+    const group = await Group.findById(groupId);
+    //Check if the user is owner of the group
+    const isOwner = userId.toString() === group.owner.toString();
+    if(!isOwner) {
+      return res.status(403).json({ message: "You are not authorized to delete this group" });
+    }
+    // Remove group reference from associated hashtags
+    for (let hashtagId of group.hashtags) {
+      await Hashtag.findByIdAndUpdate(hashtagId, { $pull: { groups: groupId } });
+    }
+    // If there is a group image, remove it from Cloudinary
+    if (group.groupImage) {
+      await cloudinary.uploader.destroy(group.groupImage.split("/").pop().split(".")[0]);
+    }
+    // Delete the group from the database
+    await Group.findByIdAndDelete(groupId);
+    // Return a success response
+    return res.status(200).json({ message: "Group deleted successfully" });
+  } catch (error) {
+    //Error Handling
+    console.log("Error in deleteGroup controller", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 export const getAllGroups = async (req, res) => {
   try {
     //Get All Groups and return them to client
