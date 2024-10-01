@@ -9,7 +9,7 @@ const LoginPage = () => {
         Login to Collaborative Study Platform
       </h2>
       <p className="mt-4">
-        Join Groups, Follow People, Scroll Posts and make your studies fun.
+        Jump into your world where studies are fun.
       </p>
       <div className="py-2 flex gap-2 flex-col">
         <label className="font-semibold">Email</label>

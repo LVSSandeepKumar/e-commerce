@@ -9,7 +9,7 @@ import Header from "./components/common/Header";
 function App() {
   return (
     <>
-      <div className="max-w-5xl mx-auto flex flex-col justify-center bg-gradient-to-br from-emerald-300 to-sky-400">
+      <div className="max-w-5xl mx-auto flex flex-col justify-center bg-gradient-to-br from-emerald-300 to-sky-400 shadow-lg">
         <Header />
         <hr className="border-t-2 border-gray-950"/>
         <Routes>
