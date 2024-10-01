@@ -11,6 +11,7 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "allowUmdGlobalAccess": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
