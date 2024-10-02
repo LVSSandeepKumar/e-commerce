@@ -58,9 +58,9 @@
 }
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border ;
   }
   body {
-    @apply text-foreground;
+    @apply text-foreground bg-gradient-to-t from-white to-gray-500 shadow-xl;
   }
 }
